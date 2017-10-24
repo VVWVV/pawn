@@ -5903,19 +5903,20 @@ static void emit_param_data(char *name, ucell *p, int size)
       emit_invalid_token(tSYMBOL, tok);
     } /* if */
     sym=findloc(str);
-    if (sym==NULL || sym->vclass!=sSTATIC)
-      sym=findglb(str,sGLOBAL);
-    if (sym==NULL) {
+    if (sym && sym->vclass!=sSTATIC)
       error(17,str);
-    } else {
-      if (sym->ident!=iVARIABLE) {
-        error(17,str);  /* undefined symbol */
-      } /* if */
-      markusage(sym,uREAD|uWRITTEN);
-      p[curp]=sym->addr;
+    if (sym==NULL)
+      sym=findglb(str,sSTATIC);
+    if (sym==NULL)
+      error(17,str);
+    if (sym->ident!=iVARIABLE && sym->ident!=iARRAY) {
+      error(17,str);  /* undefined symbol */
     } /* if */
+    markusage(sym,uREAD|uWRITTEN);
+    p[curp]=sym->addr;
   } while (++curp < size);
 }
+
 
 static void OPHANDLER_CALL emit_noop(char *name)
 {
